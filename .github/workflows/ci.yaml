@@ -1,0 +1,95 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  test_stable:
+    name: Test with vscode stable 🦾
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code 📥
+        uses: actions/checkout@v3
+
+      - name: NodeJS setup 🛠️
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies 🔧
+        run:  npm ci
+      
+      - name: Run tests 🧪
+        run:  npm run test:hidden
+
+  test_insiders:
+    name: Test with vscode insiders ⚗️
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code 📥
+        uses: actions/checkout@v3
+
+      - name: NodeJS setup 🛠️
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies 🔧
+        run:  npm ci
+      
+      - name: Run tests 🧪
+        run:  npm run test:insiders:hidden
+
+  package:
+    name: Check pacakge gen 📦
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code 📥
+        uses: actions/checkout@v3
+
+      - name: NodeJS setup 🛠️
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies 🔧
+        run:  npm ci
+      
+      - name: Generate package 📦
+        run:  npm run package
+
+  check_if_release_is_new_release:
+    name: Check if it's a new release 🔍
+    runs-on: ubuntu-latest
+    needs: [ test_stable, test_insiders, package ]
+    outputs:
+      RELEASE_VERSION: ${{ steps.result.outputs.RELEASE_VERSION }}
+    steps:
+      - name: Checkout code 📥
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check if the commit has a tag associated to it 🔍
+        id: result
+        shell: bash
+        run: |
+          tag="$(git tag --points-at ${{ github.sha }})"
+          if [[ -n "$tag" ]] && [[ "$tag" =~ v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+ ]]; then
+            echo "RELEASE_VERSION=$tag" >> "$GITHUB_OUTPUT";
+          fi
+
+  # Trigger the release if a version tag was submitted
+  make_release:
+    name: Create a new release 💫
+    needs: check_if_release_is_new_release
+    if: ${{ needs.check_if_release_is_new_release.outputs.RELEASE_VERSION }}
+    uses: ./.github/workflows/release.yaml
+    secrets: inherit
+    with:
+      release_version: ${{ needs.check_if_release_is_new_release.outputs.RELEASE_VERSION }}

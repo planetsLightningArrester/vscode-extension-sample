@@ -1,0 +1,32 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "search.exclude": {
+        "out": true, // set this to false to include "out" folder in search results
+        ".vscode-test": true
+    },
+    "files.watcherExclude": {
+        ".git/objects/**": true,
+        ".git/subtree-cache/**": true,
+        "node_modules/*/**": true,
+        ".vscode-test/*/**": true,
+    },
+    "[typescript]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+    },
+    "[javascript]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+    },
+    "[jsonc]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnPaste": true,
+    },
+    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+    "typescript.tsc.autoDetect": "off",
+    "cSpell.words": [
+        "tspaths",
+        "VSIX",
+        "xvfb"
+    ]
+}

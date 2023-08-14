@@ -1,0 +1,88 @@
+{
+  "name": "vscode-extension-sample-vite",
+  "displayName": "VS Code extension sample 😄",
+  "publisher": "planetsLightningArrester",
+  "author": "planetsLightningArrester",
+  "description": "VS Code extension sample using Vite",
+  "version": "0.0.1",
+  "main": "./out/extension.js",
+  "icon": "./assets/images/icon.png",
+  "engines": {
+    "vscode": "^1.81.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/planetsLightningArrester/vscode-extension-sample-vite"
+  },
+  "categories": [
+    "Education"
+  ],
+  "activationEvents": [
+    "onCommand:promptMessage",
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "vscode-extension-sample-vite.promptMessage",
+        "title": "[SAMPLE] Here's your message"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "Messages",
+        "properties": {
+          "vscode-extension-sample-vite.promptMessageContent": {
+            "scope": "resource",
+            "type": "string",
+            "default": "Hello World from vscode-extension-sample-vite!",
+            "description": "What message should be displayed by the command `[SAMPLE] Here's your message`"
+          }
+        }
+      }, {
+        "title": "Hover",
+        "properties": {
+          "vscode-extension-sample-vite.enableHover": {
+            "scope": "resource",
+            "type": "boolean",
+            "default": true,
+            "description": "Enable hover message in plaintext files"
+          }
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "build": "vite build",
+    "watch": "vite build -w",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/__tests__/setupAndRunTests.js",
+    "test-watch": "rm -rf out/*; tsc-watch --onSuccess \"bash -c 'resolve-tspaths && node ./out/__tests__/setupAndRunTests.js'\"",
+    "test-watch:hidden": "rm -rf out/*; tsc-watch --onSuccess \"bash -c 'resolve-tspaths && xvfb-run -s \\\"-screen 0, 1024x768x24\\\" node ./out/__tests__/setupAndRunTests.js'\"",
+    "test:hidden": "npm run pretest && xvfb-run -s \"-screen 0, 1024x768x24\" node ./out/__tests__/setupAndRunTests.js",
+    "test:insiders": "node ./out/__tests__/setupAndRunTests.js insiders",
+    "test:insiders:hidden": "npm run pretest && xvfb-run -s \"-screen 0, 1024x768x24\" node ./out/__tests__/setupAndRunTests.js insiders",
+    "pretest": "npm run build:dev && resolve-tspaths && npm run lint",
+    "build:dev": "rm -rf out/*; tsc -p .",
+    "watch:dev": "rm -rf out/*; tsc-watch --onSuccess \"resolve-tspaths\"",
+    "package": "mkdir -p release && rm -rf release/* && vsce package -o ./release",
+    "vscode:prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "20.2.5",
+    "@types/vscode": "^1.81.0",
+    "@typescript-eslint/eslint-plugin": "^5.59.8",
+    "@typescript-eslint/parser": "^5.59.8",
+    "@vscode/test-electron": "^2.3.2",
+    "@vscode/vsce": "^2.20.1",
+    "eslint": "^8.41.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "resolve-tspaths": "^0.8.15",
+    "tsc-watch": "^6.0.4",
+    "typescript": "^5.1.3",
+    "vite": "^4.4.9"
+  }
+}

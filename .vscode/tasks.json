@@ -1,0 +1,57 @@
+// See https://go.microsoft.com/fwlink/?LinkId=733558
+// for the documentation about the tasks.json format
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "tasks: watch:dev",
+			"type": "npm",
+			"script": "watch:dev",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "never",
+				"group": "watchers",
+				"clear": true,
+				"revealProblems": "onProblem"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "tasks: watch",
+			"type": "npm",
+			"script": "watch",
+			"problemMatcher": {
+				"fileLocation": "absolute",
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": {
+						"regexp": "^build started...$"
+					},
+					"endsPattern": {
+						"regexp": "(^built in)|(^\\d+[ \\t]+|[ \\t]+$)"
+					}
+				},
+				"pattern": {
+					"regexp": "^([^:]+):(\\d+):(\\d+):\\s*(\\w+):\\s*(.*)",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"message": 5
+				}
+			},
+			"isBackground": true,
+			"presentation": {
+				"reveal": "never",
+				"group": "watchers",
+				"clear": true,
+				"revealProblems": "onProblem"
+			},
+			"group": "build"
+		},
+	]
+}

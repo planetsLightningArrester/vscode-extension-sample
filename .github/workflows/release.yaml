@@ -1,0 +1,91 @@
+name: Create release
+
+on:
+  workflow_call:
+    inputs:
+      release_version:
+        type: string
+        description: 'Release version formatted as "vMM.mm.pp-variant"'
+        required: true
+
+env:
+  RELEASE_VERSION: ""
+
+jobs:
+
+  create-release:
+    name: Create GitHub release 🏷️
+    runs-on: ubuntu-latest
+    outputs:
+      RELEASE_VERSION: ${{ steps.set_release_version.outputs.RELEASE_VERSION }}
+    steps:
+      - name: Checkout code 📥
+        uses: actions/checkout@v3
+
+      - name: Set Release version 🏷️
+        id: set_release_version
+        shell: bash
+        run: |
+          RELEASE_VERSION=${{ inputs.release_version }}
+          if [[ -n $RELEASE_VERSION ]] && [[ $RELEASE_VERSION =~ v[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+ ]]; then
+            RELEASE_VERSION=$(echo "$RELEASE_VERSION" | cut -c 2-)
+            echo "[INFO] Release version: v$RELEASE_VERSION"
+            echo "RELEASE_VERSION=$RELEASE_VERSION" >> "$GITHUB_ENV"
+          else
+            echo "[ERROR] RELEASE_VERSION is '$RELEASE_VERSION' and it's invalid for a workflow_call";
+            exit 1;
+          fi
+
+      - name: Create GitHub Release 
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }} # Create a "personal token" and added as a "secret" in the repo settings
+        with:
+          tag_name: ${{ inputs.release_version }}
+          release_name: ${{ inputs.release_version }}
+          body_path: ./CHANGELOG.md
+
+      - name: NodeJS setup 🛠️
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+  
+      - name: Generate .vsix 📦
+        run:  npm ci && npm run package
+
+      - name: Upload .vsix to the release 📤
+        id: upload-relase-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./release/vscode-extension-sample-vite-${{ env.RELEASE_VERSION }}.vsix
+          asset_name: vscode-extension-sample-vite-${{ env.RELEASE_VERSION }}.vsix
+          asset_content_type: application/octet-stream
+
+  vsce-publish:
+    name: Publish 🚀
+    runs-on: ubuntu-latest
+    needs: create-release
+    
+    steps:
+    - name: Checkout code 📥
+      uses: actions/checkout@v3
+
+    - name: NodeJS setup 🛠️
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Install dependencies 🔧
+      run: npm ci
+
+    - name: Publish package 🚀
+      run: npx vsce publish
+      env:
+        VSCE_PAT: ${{ secrets.VSCE_PAT }} # Create a Azure Personal Token Access and added as a "secret" in the repo settings
+
+# EOF
